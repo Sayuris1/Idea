@@ -1,0 +1,64 @@
+key_trigger {
+  input: KEY_W
+  action: "up_1"
+}
+key_trigger {
+  input: KEY_A
+  action: "left_1"
+}
+key_trigger {
+  input: KEY_S
+  action: "down_1"
+}
+key_trigger {
+  input: KEY_D
+  action: "right_1"
+}
+key_trigger {
+  input: KEY_UP
+  action: "up_2"
+}
+key_trigger {
+  input: KEY_DOWN
+  action: "down_2"
+}
+key_trigger {
+  input: KEY_LEFT
+  action: "left_2"
+}
+key_trigger {
+  input: KEY_RIGHT
+  action: "right_2"
+}
+key_trigger {
+  input: KEY_E
+  action: "fast_1"
+}
+key_trigger {
+  input: KEY_I
+  action: "fast_2"
+}
+key_trigger {
+  input: KEY_R
+  action: "special_1"
+}
+key_trigger {
+  input: KEY_O
+  action: "special_2"
+}
+key_trigger {
+  input: KEY_T
+  action: "guard_1"
+}
+key_trigger {
+  input: KEY_P
+  action: "guard_2"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "restart"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "touch"
+}

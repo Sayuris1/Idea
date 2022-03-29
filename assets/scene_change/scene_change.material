@@ -1,0 +1,19 @@
+name: "scene_change"
+tags: "scene_change"
+vertex_program: "/builtins/materials/sprite.vp"
+fragment_program: "/assets/scene_change/scene_change.fp"
+vertex_space: VERTEX_SPACE_WORLD
+vertex_constants {
+  name: "view_proj"
+  type: CONSTANT_TYPE_VIEWPROJ
+}
+fragment_constants {
+  name: "u_in"
+  type: CONSTANT_TYPE_USER
+  value {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+}

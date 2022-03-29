@@ -1,0 +1,350 @@
+local IDENTITY = vmath.vector3(0)
+
+local function fast_attack(self, action_id, action)
+    -- Attack
+    if self.fast_combo < 3 then
+        self.is_attacking = true
+        self.fast_combo = self.fast_combo + 1
+
+        if self.fast_combo == 1 then
+            local pos = go.get_position()
+            local pos_2 = go.get_position("/go1")
+            self.fast = factory.create("#fist_factory", pos_2 + vmath.vector3(70 * self.current_x_dir, -20, 1), go.get_rotation(), nil, 3)
+
+            go.set_parent(self.fast, ".", false)
+
+            local pos_child = vmath.vector3(pos)
+            pos_child.x = self.current_x_dir * 80
+            pos.x = pos.x + 40 * self.current_x_dir
+
+            if self.current_x_dir < 0 then
+                local url = msg.url(self.fast); url.fragment = "sprite"
+                sprite.set_hflip(url, true)
+            end
+
+            timer.delay(0.2, false, function ()
+                go.delete(self.fast)
+                self.fast = nil
+
+                if self.attack_buffer[1] == "fast" then
+                    table.remove(self.attack_buffer, 1)
+                    fast_attack(self, action_id, action)
+                end
+            end)
+
+            go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, pos.x, go.EASING_OUTSINE, 0.3, 0, function()
+                self.is_attacking = false
+                self.fast_combo = 0
+            end)
+
+        elseif self.fast_combo == 2 then
+            local pos = go.get_position()
+
+            sprite.play_flipbook("ghost_sprite#sprite", "sokrates_ghost_hit", function ()
+                sprite.play_flipbook("ghost_sprite#sprite", "sokratessuper")
+            end)
+
+            timer.delay(0.4, false, function ()
+                
+                local pos_2 = go.get_position("/go1")
+                self.fast = factory.create("#fast_factory", pos_2 + vmath.vector3(60 * self.current_x_dir, 0, 1))
+                go.set_parent(self.fast, ".", false)
+            end)
+
+            timer.delay(0.9, false, function ()
+                go.delete(self.fast)
+                self.fast = nil
+
+                if self.attack_buffer[1] == "fast" then
+                    self.attack_buffer = {}
+                    fast_attack(self, action_id, action)
+                end
+            end)
+
+            go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, pos.x, go.EASING_OUTSINE, 1, 0, function()
+                self.is_attacking = false
+                self.fast_combo = 0
+            end)
+
+        elseif self.fast_combo == 3 then
+            local pos = go.get_position()
+            local pos_2 = go.get_position("/go1")
+            self.fast = factory.create("#pencil_factory", pos_2 + vmath.vector3(80 * self.current_x_dir, -85, 1), go.get_rotation(), nil, 2)
+
+            go.set_parent(self.fast, ".", false)
+
+            local pos_child = vmath.vector3(pos)
+            pos_child.x = self.current_x_dir * 80
+            pos.x = pos.x + 40 * self.current_x_dir
+
+            if self.current_x_dir > 0 then
+                local url = msg.url(self.fast); url.fragment = "sprite"
+                sprite.set_hflip(url, true)
+            end
+
+            timer.delay(1.0, false, function ()
+                go.delete(self.fast)
+                self.fast = nil
+
+                if self.attack_buffer[1] == "fast" then
+                    table.remove(self.attack_buffer, 1)
+                    fast_attack(self, action_id, action)
+                end
+            end)
+
+            go.animate(".", "position.x", go.PLAYBACK_ONCE_FORWARD, pos.x, go.EASING_OUTSINE, 1.1, 0, function()
+                self.is_attacking = false
+                self.fast_combo = 0
+            end)
+        end
+    end
+end
+
+local function ranged_attack (self)
+    self.special_cooldown = 2
+    local bullet = factory.create("#ranged_factory", go.get_position() + vmath.vector3(120 * self.current_x_dir, 0, 0))
+    local pos = go.get_position(bullet)
+    go.animate(bullet, "position.x", go.PLAYBACK_ONCE_FORWARD, pos.x + 120 * self.current_x_dir, go.EASING_OUTBACK, 1, 0, function()
+        go.delete(bullet)
+    end)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	
+	go.property("speed", 200)
+	go.property("down_speed", -200)
+
+	self.x_direction = 0
+    self.current_x_dir = 0
+	self.y_velocity = self.down_speed
+
+    self.jump_no = 0
+
+    self.is_idle = false
+
+    -- Set collision correction
+    self.correction = vmath.vector3()
+
+    self.hp = 0
+    self.knockback = false
+
+    self.is_attacking = false
+    self.can_attack = true
+    self.fast_combo = 0
+
+    self.special_cooldown = 0
+
+    self.attack_buffer = {}
+
+    self.time = 0
+    self.time_2 = 0
+    self.is_shield_up = false
+    msg.post("/go2#model", "disable")
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+    self.time = (self.time + dt * 10)
+    self.time_2 = (self.time_2 + dt * 10)
+    if self.time_2 > 7 then
+        self.time_2 = 7
+    end
+
+    go.set("/go2#model", "u_in", vmath.vector4(self.time, 0, 0, 0))
+
+    self.special_cooldown = self.special_cooldown - dt
+    -- Reset collision correction
+    self.correction = vmath.vector3()
+	local pos = go.get_position()
+
+    -- Knockback
+    if self.knockback then
+        self.is_attacking = false
+        self.fast_combo = 0
+
+        go.cancel_animations(".", "position.x")
+        pos.x = pos.x + (self.knockback.x * self.speed * dt)
+
+        go.set_position(pos)
+
+	-- Move x
+    elseif not self.is_attacking then
+        if self.x_direction ~= 0 then
+            pos.x = pos.x + (self.x_direction * self.speed * dt)
+            go.set_position(pos)
+
+            -- Set sprite flip
+            if self.x_direction < 0 then
+                sprite.set_hflip("ghost_sprite#sprite", true)
+                go.set_position(vmath.vector3(-100, 0, 0), "/go1")
+                self.current_x_dir = -1
+            else
+                sprite.set_hflip("ghost_sprite#sprite", false)
+                go.set_position(vmath.vector3(-10, 0, 0), "/go1")
+                self.current_x_dir = 1
+            end
+
+            if self.is_idle then
+                self.is_idle = false
+            end
+        else
+            self.is_idle = true
+        end
+    end
+
+	-- Fall down
+	if self.y_velocity < -20 then
+		self.y_velocity = self.y_velocity * 1.05
+		pos.y = pos.y + (self.y_velocity * dt)
+		go.set_position(pos)
+
+    -- Jump
+	elseif self.y_velocity > 0 then
+		self.y_velocity = self.y_velocity * 0.9
+		pos.y = pos.y + (self.y_velocity * dt)
+		go.set_position(pos)
+
+        -- At the top, star falling
+        if self.y_velocity < 50 then
+            self.y_velocity = self.down_speed
+        end
+	end
+
+    physics.raycast_async(pos, vmath.vector3(pos.x, pos.y + 2, pos.z), {hash("level")})
+end
+
+function on_message(self, message_id, message, sender)
+    -- Handle collision
+  if message_id == hash("contact_point_response") then
+    if message.normal.y >= 0 then
+        self.y_velocity = 0
+        self.jump_no = 0
+    end
+
+    -- Get the info needed to move out of collision. We might
+    -- get several contact points back and have to calculate
+    -- how to move out of all of them by accumulating a
+    -- correction vector for this frame:
+    if message.distance > 0 then
+      -- First, project the accumulated correction onto
+      -- the penetration vector
+      local proj = vmath.project(self.correction, message.normal * message.distance)
+      if proj < 1 then
+        -- Only care for projections that does not overshoot.
+        local comp = (message.distance - message.distance * proj) * message.normal
+        -- Apply compensation
+        go.set_position(go.get_position() + comp)
+        -- Accumulate correction done
+        self.correction = self.correction + comp
+      end
+    end
+
+    elseif message_id == hash("ray_cast_missed") then
+        if self.y_velocity == 0 then
+            self.y_velocity = self.down_speed
+        end
+
+    -- Special
+    elseif message_id == hash("collision_response") then
+        if message.other_group == hash("special") then
+            self.has_special = true
+            go.delete(message.other_id)
+        end
+
+    -- Knockback
+    elseif message_id == hash("trigger_response") and message.enter then
+        if message.other_group == hash("dead") then
+            go.delete(ghost)
+            self.zawardo_go = false
+            zawardo = false
+        end
+
+        if go.get_id() ~= go.get_parent(message.other_id) then
+            if self.get_hit_timer then
+                timer.cancel(self.get_hit_timer)
+            end
+
+            self.can_attack = false
+
+            go.cancel_animations(".", "position.x")
+            self.get_hit_timer = timer.delay(0.85, false, function()
+                local other_pos = go.get_position("/player_2")
+                local pos = go.get_position()
+
+                self.knockback = vmath.normalize(pos - other_pos) * self.hp
+                local reduce = -self.knockback
+                local time = 0
+
+                -- Set move
+                self.knockback_timer = timer.delay(0.01, true, function()
+                    time = time + 0.1
+
+                    if not self.is_shield_up then
+                        self.knockback.x = self.knockback.x * 0.9
+                    else
+                        self.knockback.x = self.knockback.x * 0.5
+                    end
+
+                    self.knockback.x = self.knockback.x * 0.9
+                    if math.abs(self.knockback.x) < 0.2 then
+                        self.can_attack = true
+
+                        self.knockback = nil
+                        timer.cancel(self.knockback_timer)
+                    end
+                end)
+            end)
+
+            self.hp = self.hp + 1
+            label.set_text("/player_1_hp#hp", self.hp)
+        end
+    end
+end
+
+function on_input(self, action_id, action)
+	--Movement
+	if action.pressed then
+		if action_id == hash("left_1") then
+			self.x_direction = self.x_direction - 1
+		elseif action_id == hash("right_1") then
+			self.x_direction = self.x_direction + 1
+		elseif action_id == hash("up_1") then
+            if self.jump_no <= 1 then
+                self.jump_no = self.jump_no + 1
+                self.y_velocity = 800
+            end
+		elseif action_id == hash("down_1") then
+			--self.direction.y = self.direction.y - 1
+		end
+		
+	elseif action.released then
+        if self.x_direction ~= 0 then
+            if action_id == hash("left_1") then
+                self.x_direction = self.x_direction + 1
+            elseif action_id == hash("right_1") then
+                self.x_direction = self.x_direction - 1
+            end
+        end
+		if action_id == hash("up_1") then
+			--self.direction.y = self.direction.y - 1
+		elseif action_id == hash("down_1") then
+			--self.direction.y = self.direction.y + 1
+		end
+	end
+
+    if action_id == hash("fast_1") and action.pressed and self.can_attack then
+        msg.post("/go2#model", "disable")
+        self.is_shield_up = false
+        if self.is_attacking then
+            self.attack_buffer[#self.attack_buffer+1] = "fast"
+        else
+            fast_attack(self, action_id, action)
+        end
+    end
+end

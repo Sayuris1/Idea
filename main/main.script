@@ -1,0 +1,52 @@
+function init(self)
+    --[[ self.play_time = 0 ]]
+
+    msg.post(".", "acquire_input_focus")
+    self.is_started = false
+    sound.play("/music#sound")
+
+    go.set("#sprite", "scale", vmath.vector3(1, 1, 1))
+
+    --[[ if videoplayer ~= nil then
+        local videoresource = resource.load("/assets/videos/intro.webm")
+        self.video = videoplayer.open(videoresource)
+        self.videoinfo = videoplayer.get_info(self.video)
+        self.videoheader = { width=self.videoinfo.width, height=self.videoinfo.height, type=resource.TEXTURE_TYPE_2D, format=resource.TEXTURE_FORMAT_RGB, num_mip_maps=1 }
+        self.videoframe = videoplayer.get_frame(self.video)
+    else
+        print("Could not initialize videoplayer")
+    end ]]
+end
+
+function update(self, dt)
+	--[[ if videoplayer ~= nil then
+        self.play_time = self.play_time + dt
+        videoplayer.update(self.video, dt)
+        local path = go.get("#sprite", "texture0")
+        resource.set_texture(path, self.videoheader, self.videoframe)
+    end ]]
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("proxy_loaded") then
+        -- enable the collection and let the loader know
+        msg.post(sender, "enable")
+    elseif message_id == hash("proxy_unloaded") then
+        msg.post("/game#collectionproxy", "load")
+    end
+end
+
+function on_input(self, action_id, action)
+    --if action_id and not self.is_started and self.play_time < 37.08 then
+    if action_id and not self.is_started then
+        sound.stop("/music#sound")
+        msg.post("/cameramain", "disable")
+        msg.post("sprite", "disable")
+        self.is_started = true
+        msg.post("/game#collectionproxy", "load")
+    elseif action_id == hash("restart") then
+        msg.post("/game#collectionproxy", "disable")
+        msg.post("/game#collectionproxy", "final")
+        msg.post("/game#collectionproxy", "unload")
+    end
+end

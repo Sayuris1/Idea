@@ -1,0 +1,19 @@
+local camera = require "orthographic.camera"
+
+function update(self, dt)
+	local pos_1 = go.get_position("/player_1")
+	local pos_2 = go.get_position("/player_2")
+    local distance = pos_1 - pos_2
+
+    local middle = (pos_1 + pos_2) * 0.5; middle.z = 0
+
+    if middle.x < -400 then
+        middle.x = -400
+    elseif middle.x > 400 then
+        middle.x = 400
+    end
+
+    pprint(middle)
+    go.set_position(vmath.vector3(middle.x * 0.2, 0, -2), "/bg2#sprite")
+    go.set_position(vmath.vector3(middle.x * 0.1, 0, -3), "/bg3#sprite")
+end

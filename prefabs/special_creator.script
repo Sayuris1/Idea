@@ -1,0 +1,52 @@
+function init(self)
+	self.positions = {
+        vmath.vector3(0, 350, 0),
+        vmath.vector3(-160, -68, 0),
+        vmath.vector3(166, 142, 0),
+    }
+    
+    self.creating = false
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("used") and not self.creating then
+        self.creating = true
+        timer.delay(5, false, function ()
+            if not (in_marra and zawardo and self.creating) then
+                local random = math.random(3)
+                local special = factory.create("#special_factory", self.positions[random])
+                self.creating = false
+            end
+        end)
+    end
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end
