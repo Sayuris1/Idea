@@ -448,6 +448,7 @@ function on_input(self, action_id, action)
             local random = math.random(2)
             sound.play("/sound#jump" .. random)
 
+            go.set_scale(0.2)
             go.animate(".", "scale", go.PLAYBACK_ONCE_PINGPONG, vmath.vector3(0.15, 0.25, 1), go.EASING_LINEAR, 0.2)
             self.jump_no = self.jump_no + 1
             self.y_velocity = 800
