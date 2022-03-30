@@ -5,8 +5,6 @@ function init(self)
     self.is_started = false
     sound.play("/music#sound")
 
-    go.set("#sprite", "scale", vmath.vector3(1, 1, 1))
-
     --[[ if videoplayer ~= nil then
         local videoresource = resource.load("/assets/videos/intro.webm")
         self.video = videoplayer.open(videoresource)

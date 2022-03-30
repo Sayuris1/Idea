@@ -13,7 +13,6 @@ function update(self, dt)
         middle.x = 400
     end
 
-    pprint(middle)
     go.set_position(vmath.vector3(middle.x * 0.2, 0, -2), "/bg2#sprite")
     go.set_position(vmath.vector3(middle.x * 0.1, 0, -3), "/bg3#sprite")
 end

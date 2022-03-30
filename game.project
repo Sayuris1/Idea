@@ -8,7 +8,6 @@ shared_state = 1
 [display]
 width = 1280
 height = 720
-fullscreen = 1
 
 [android]
 input_method = HiddenInputField
@@ -31,4 +30,7 @@ max_particle_count = 9999
 
 [particle_fx]
 max_particle_count = 9999
+
+[html5]
+scale_mode = stretch
 
