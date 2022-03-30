@@ -244,9 +244,10 @@ function on_message(self, message_id, message, sender)
     -- Knockback
     elseif message_id == hash("trigger_response") and message.enter then
         if message.other_group == hash("dead") then
-            go.delete(ghost)
             self.zawardo_go = false
             zawardo = false
+            msg.post("/special_creator#special_creator", "used")
+            go.delete(ghost)
         end
 
         if go.get_id() ~= go.get_parent(message.other_id) then

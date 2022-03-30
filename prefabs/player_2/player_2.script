@@ -157,7 +157,7 @@ local function fast_attack(self, action_id, action)
                 timer.delay(2, false, function ()
                     msg.post("/floor", "enable")
                     msg.post("/marra", "disable")
-                    self.translation = 0.06
+                    self.translation = 0.01
                     in_marra = false
                     msg.post("/player_1", "go_to_start")
                     msg.post("/player_2", "go_to_start")
@@ -211,11 +211,11 @@ function init(self)
     self.attack_buffer = {}
 
     self.time = 0
-    self.translation = 0.06
+    self.translation = 0.01
     self.is_shield_up = false
     msg.post("/go3#model", "disable")
     msg.post("/hit_red1", "disable")
-
+    
     self.healt = 3
 end
 
@@ -412,7 +412,7 @@ function on_message(self, message_id, message, sender)
                     msg.post("/player_1", "go_to_start")
                     msg.post("/floor", "enable")
                     msg.post("/marra", "disable")
-                    self.translation = 0.06
+                    self.translation = 0.01
 
                     timer.delay(2, false, function ()
                         in_marra = false
