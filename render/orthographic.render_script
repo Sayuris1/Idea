@@ -99,6 +99,10 @@ function update(self)
     elseif in_marra then
         -- clear color
         render.set_depth_mask(true)
+        if clear_marra then
+            render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
+            clear_marra = false
+        end
         render.set_depth_mask(false)
         
         -- set default blend state

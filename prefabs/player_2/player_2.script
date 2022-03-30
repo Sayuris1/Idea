@@ -466,14 +466,17 @@ function on_input(self, action_id, action)
         msg.post("/go3#model", "disable")
         self.is_shield_up = false
         if self.has_special then
-            sound.play("/sound#marra")
-            self.has_special = false
-            go.set_position(self.start_pos)
-            msg.post("/player_1", "go_to_start")
-            in_marra = true
-            msg.post("/marra", "enable")
-            timer.delay(1.5, false, function ()
-                self.translation = 0.5
+            timer.delay(0.1, false, function() 
+                sound.play("/sound#marra")
+                self.has_special = false
+                go.set_position(self.start_pos)
+                msg.post("/player_1", "go_to_start")
+                clear_marra = true
+                in_marra = true
+                msg.post("/marra", "enable")
+                timer.delay(1.5, false, function ()
+                    self.translation = 0.5
+                end)
             end)
         else
             ranged_attack(self)
