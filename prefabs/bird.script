@@ -15,7 +15,7 @@ function update(self, dt)
 
         local position = go.get_position()
 
-        if vmath.length(destination - position) > 20 then
+        if vmath.length(destination - position) > 60 then
             self.is_near = false
 
             local dir = vmath.normalize(destination - position)

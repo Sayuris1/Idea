@@ -398,6 +398,7 @@ function on_message(self, message_id, message, sender)
             label.set_text("/player_2_hp#hp", self.hp)
             self.healt = self.healt - 1
             if self.healt > 0 then
+                go.set_scale(0.2)
                 self.y_velocity = 0
                 go.set_position(self.start_pos)
                 sprite.play_flipbook("/go6#sprite1", tostring(self.healt))
@@ -462,11 +463,11 @@ function on_input(self, action_id, action)
         end
 
     elseif action_id == hash("special_2") and action.pressed and self.can_attack and special_cooldown < 0 and not in_marra then
-        msg.post("/floor", "disable")
         msg.post("/go3#model", "disable")
         self.is_shield_up = false
         if self.has_special then
             timer.delay(0.1, false, function() 
+                msg.post("/floor", "disable")
                 sound.play("/sound#marra")
                 self.has_special = false
                 go.set_position(self.start_pos)
